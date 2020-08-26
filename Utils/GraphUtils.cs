@@ -8,7 +8,7 @@ namespace SynonymService.Utils
 {
     public class GraphUtils
     {
-        public static void GetSynonymsTuples(Node keyword, List<Path> data)
+        public static void GetSynonyms(Node keyword, List<Path> data, ref List<string> result)
         {
             keyword.Visited = true;
             List<Node> outgoing = new List<Node>();
@@ -18,20 +18,25 @@ namespace SynonymService.Utils
                 if (path.Synonym.Value.ToLower() == keyword.Value.ToLower() && !path.Synonym.Visited)
                 {
                     outgoing.Add(path.Keyword);
-                    //Result.Add(path.Keyword.Value);
+                    result.Add(path.Keyword.Value);
                 }
                 else if (path.Keyword.Value.ToLower() == keyword.Value.ToLower() && !path.Keyword.Visited)
                 {
                     outgoing.Add(path.Synonym);
-                    //Result.Add(path.Synonym.Value);
+                    result.Add(path.Synonym.Value);
                 }
             }
 
             foreach (Node node in outgoing) 
             {
-                GetSynonymsTuples(node, data);
+                GetSynonyms(node, data, ref result);
             }
 
+        }
+
+        public static List<Path> ConvertToNodes(IEnumerable<SynonymModel> synonyms)
+        {
+            return synonyms.Select(synonym => new Path(new Node(synonym.Keyword), new Node(synonym.Synonym))).ToList();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SynonymService.DataContext;
 using SynonymService.Models;
 
@@ -26,29 +27,35 @@ namespace SynonymService.Controllers
             return _context.Synonyms.ToList();
         }
 
-        // GET: api/Synonym/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public ActionResult<SynonymModel> Get(int id)
         {
-            return "value";
+            return _context.Synonyms.Find(id);
         }
 
-        // POST: api/Synonym
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post(SynonymModel model)
         {
+            //Determine the next ID
+            var id = _context.Synonyms.Select(x => x.Id).Max() + 1; //In memory DB...that's why.
+            model.Id = id;
+
+            _context.Synonyms.Add(model);
+            _context.SaveChanges();
         }
 
-        // PUT: api/Synonym/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut]
+        public void Put(SynonymModel model)
         {
+            _context.Synonyms.Update(model);
+            _context.SaveChanges();
         }
 
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete]
+        public void Delete(SynonymModel model)
         {
+            _context.Synonyms.Remove(model);
+            _context.SaveChanges();
         }
     }
 }

@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SynonymService.DataContext;
+using SynonymService.Models;
+using SynonymService.Utils;
 
 namespace SynonymService.Controllers
 {
@@ -11,11 +14,23 @@ namespace SynonymService.Controllers
     [ApiController]
     public class SearchController : ControllerBase
     {
-        // GET: api/Search
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly SynonymDBContext _context;
+
+        public SearchController(SynonymDBContext context)
         {
-            return new string[] {"value1", "value2"};
+            _context = context;
+        }
+
+        [HttpGet("{keyword}")]
+        public IEnumerable<string> Get(string keyword)
+        {
+            var result = new List<string>();
+            var synonyms = GraphUtils.ConvertToNodes(_context.Synonyms.ToList());
+            var entryNode = new Node(keyword);
+
+            GraphUtils.GetSynonyms(entryNode, synonyms, ref result);
+
+            return result;
         }
     }
 }
